@@ -25,4 +25,8 @@ public class App {
         Stream<String> lines = Files.lines(path);
         return lines;
     }
+
+    public static long countSouthBound(Stream<String> lines) {
+        return lines.filter(line -> line.startsWith("B")).count() / 2;
+    }
 }
