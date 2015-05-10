@@ -43,13 +43,9 @@ public class App {
     public static List<Integer> getDayEndPoints(int[] timeSeriesData) {
 
         List<Integer> dayEndPoints = new ArrayList<Integer>();
-        IntStream.range(1, timeSeriesData.length - 1).filter(i -> {
-            if (timeSeriesData[i - 1] > timeSeriesData[i]) {
-                return true;
-            } else {
-                return false;
-            }
-        }).forEach(i -> dayEndPoints.add(i - 1));
+        IntStream.range(1, timeSeriesData.length - 1)
+                .filter(i -> timeSeriesData[i - 1] > timeSeriesData[i])
+                .forEach(i -> dayEndPoints.add(i - 1));
 
         // The last point provided by the data may not be the actual end point for the day.
         // But we assume it as the last point for analytics purpose.
