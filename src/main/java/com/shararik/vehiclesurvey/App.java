@@ -14,6 +14,8 @@ public class App {
 
     private static final String DATA_FILE_NAME = "data.txt";
     public static String[] dataArray;
+    public static final int DURATION_1DAY = 86400000;
+    public static final int DURATION_15MINS = 900000;
 
     public static void main(String[] args) throws IOException {
         try (Stream<String> dataStream = readData(DATA_FILE_NAME)) {
@@ -32,6 +34,11 @@ public class App {
         Path path = Paths.get(filePathStr);
         Stream<String> lines = Files.lines(path);
         return lines;
+    }
+
+    // Parse raw data to objects
+    public static Record parseRecord(String rawData) {
+        return new Record(Hose.valueOf(rawData.substring(0, 1)), Integer.parseInt(rawData.substring(1)));
     }
 
     // Transform data to time series data

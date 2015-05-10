@@ -20,6 +20,13 @@ public class AppTest {
     }
 
     @Test
+    public void testRawDataToObject() throws IOException {
+        Record record = App.parseRecord("A98186");
+        assertEquals(Hose.A, record.getHose());
+        assertEquals(98186, record.getTime());
+    }
+
+    @Test
     public void testTimeSeriesDataTransformation() throws IOException {
         Stream<String> dataStream = App.readData("data.txt");
         int[] timeSeriesData = App.transformToTimeSeriesData(dataStream);
