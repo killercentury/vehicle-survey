@@ -5,6 +5,7 @@ package com.shararik.vehiclesurvey;
  */
 public class Record {
     private Hose hose;
+    // the number of milliseconds since midnight
     private int time;
 
     public Record(Hose hose, int time) {

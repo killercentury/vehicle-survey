@@ -26,6 +26,8 @@ public class App {
 
             getDayEndPoints(timeSeriesData).forEach(System.out::println);
             getDayEndPoints(timeSeriesData).forEach(i -> System.out.println(timeSeriesData[i]));
+
+            Record[] records = Arrays.stream(dataArray).map(s -> parseRecord(s)).toArray(Record[]::new);
         }
     }
 
@@ -36,7 +38,7 @@ public class App {
         return lines;
     }
 
-    // Parse raw data to objects
+    // Parse data from string to object
     public static Record parseRecord(String rawData) {
         return new Record(Hose.valueOf(rawData.substring(0, 1)), Integer.parseInt(rawData.substring(1)));
     }
