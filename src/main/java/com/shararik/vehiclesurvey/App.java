@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -61,6 +62,17 @@ public class App {
         dayEndPoints.add(timeSeriesData.length - 1);
 
         return dayEndPoints;
+    }
+
+    public static List<List<Record>> segmentRecords(List<Record> records, int duration) {
+        List<List<Record>> segmentedRecords = new ArrayList<List<Record>>();
+        IntStream.range(0, DURATION_1DAY / duration).forEach(i -> {
+            List<Record> recordsByDuration = records.stream()
+                    .filter(r -> r.getTime() > i * duration && r.getTime() <= (i + 1) * duration)
+                    .collect(Collectors.toList());
+            segmentedRecords.add(recordsByDuration);
+        });
+        return segmentedRecords;
     }
 
     public static long countSouthBound(Stream<String> lines) {
