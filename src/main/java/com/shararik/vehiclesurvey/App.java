@@ -25,10 +25,13 @@ public class App {
 
             int[] timeSeriesData = transformToTimeSeriesData(Arrays.stream(dataArray));
 
-            getDayEndPoints(timeSeriesData).forEach(System.out::println);
-            getDayEndPoints(timeSeriesData).forEach(i -> System.out.println(timeSeriesData[i]));
+            List<Record> records = Arrays.stream(dataArray).map(s -> parseRecord(s)).collect(Collectors.toList());
+            List<Integer> dayEndPoints = getDayEndPoints(records);
+//            dayEndPoints.forEach(System.out::println);
+//            dayEndPoints.forEach(i -> System.out.println(records.get(i).getTime()));
 
-            Record[] records = Arrays.stream(dataArray).map(s -> parseRecord(s)).toArray(Record[]::new);
+            List<List<Record>> segmentedRecords = segmentRecords(records, DURATION_15MINS, dayEndPoints.size());
+            System.out.println(segmentedRecords.size());
         }
     }
 
@@ -50,28 +53,38 @@ public class App {
     }
 
     // Find all the index of last data point of the day
-    public static List<Integer> getDayEndPoints(int[] timeSeriesData) {
+    public static List<Integer> getDayEndPoints(List<Record> records) {
 
         List<Integer> dayEndPoints = new ArrayList<Integer>();
-        IntStream.range(1, timeSeriesData.length - 1)
-                .filter(i -> timeSeriesData[i - 1] > timeSeriesData[i])
+        IntStream.range(1, records.size())
+                .filter(i -> records.get(i - 1).getTime() > records.get(i).getTime())
                 .forEach(i -> dayEndPoints.add(i - 1));
 
         // The last point provided by the data may not be the actual end point for the day.
         // But we assume it as the last point for analytics purpose.
-        dayEndPoints.add(timeSeriesData.length - 1);
+        dayEndPoints.add(records.size() - 1);
 
         return dayEndPoints;
     }
 
-    public static List<List<Record>> segmentRecords(List<Record> records, int duration) {
+    // The records are only limited to one day due to the time is reset daily in the raw data
+    public static List<List<Record>> segmentRecords(List<Record> records, int duration, int days) {
+        List<Integer> dayEndPoints = getDayEndPoints(records);
+        int numOfSegments = DURATION_1DAY / duration;
         List<List<Record>> segmentedRecords = new ArrayList<List<Record>>();
-        IntStream.range(0, DURATION_1DAY / duration).forEach(i -> {
-            List<Record> recordsByDuration = records.stream()
-                    .filter(r -> r.getTime() > i * duration && r.getTime() <= (i + 1) * duration)
-                    .collect(Collectors.toList());
-            segmentedRecords.add(recordsByDuration);
-        });
+
+        IntStream.range(0, dayEndPoints.size()).forEach(i -> {
+                    int fromIndex = (i == 0) ? 0 : dayEndPoints.get(i - 1) + 1;
+                    int toIndex = dayEndPoints.get(i) + 1;
+                    IntStream.range(0, numOfSegments).forEach(n -> {
+                        List<Record> recordsByDuration = records.subList(fromIndex, toIndex).stream()
+                                .filter(r -> r.getTime() > n * duration && r.getTime() <= (n + 1) * duration)
+                                .collect(Collectors.toList());
+                        segmentedRecords.add(recordsByDuration);
+                    });
+                }
+        );
+
         return segmentedRecords;
     }
 
