@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class App {
@@ -16,6 +17,9 @@ public class App {
     private static final String DATA_FILE_NAME = "data.txt";
     public static String[] dataArray;
     public static final int DURATION_1DAY = 86400000;
+    public static final int DURATION_1HOUR = 3600000;
+    public static final int DURATION_30MINS = 1800000;
+    public static final int DURATION_20MINS = 1200000;
     public static final int DURATION_15MINS = 900000;
 
     public static void main(String[] args) throws IOException {
@@ -26,12 +30,12 @@ public class App {
             int[] timeSeriesData = transformToTimeSeriesData(Arrays.stream(dataArray));
 
             List<Record> records = Arrays.stream(dataArray).map(s -> parseRecord(s)).collect(Collectors.toList());
-            List<Integer> dayEndPoints = getDayEndPoints(records);
 //            dayEndPoints.forEach(System.out::println);
 //            dayEndPoints.forEach(i -> System.out.println(records.get(i).getTime()));
 
-            List<List<Record>> segmentedRecords = segmentRecords(records, DURATION_15MINS, dayEndPoints.size());
+            List<List<Record>> segmentedRecords = segmentRecords(records, DURATION_15MINS);
             System.out.println(segmentedRecords.size());
+            countSouthBoundPerSegment(segmentedRecords).forEach(System.out::println);
         }
     }
 
@@ -67,15 +71,17 @@ public class App {
         return dayEndPoints;
     }
 
-    // The records are only limited to one day due to the time is reset daily in the raw data
-    public static List<List<Record>> segmentRecords(List<Record> records, int duration, int days) {
+    public static List<List<Record>> segmentRecords(List<Record> records, int duration) {
         List<Integer> dayEndPoints = getDayEndPoints(records);
         int numOfSegments = DURATION_1DAY / duration;
         List<List<Record>> segmentedRecords = new ArrayList<List<Record>>();
 
         IntStream.range(0, dayEndPoints.size()).forEach(i -> {
+                    // from inclusive index
                     int fromIndex = (i == 0) ? 0 : dayEndPoints.get(i - 1) + 1;
+                    // to exclusive index
                     int toIndex = dayEndPoints.get(i) + 1;
+
                     IntStream.range(0, numOfSegments).forEach(n -> {
                         List<Record> recordsByDuration = records.subList(fromIndex, toIndex).stream()
                                 .filter(r -> r.getTime() > n * duration && r.getTime() <= (n + 1) * duration)
@@ -88,7 +94,19 @@ public class App {
         return segmentedRecords;
     }
 
-    public static long countSouthBound(Stream<String> lines) {
-        return lines.filter(line -> line.startsWith("B")).count() / 2;
+    public static long countSouthBound(List<Record> records) {
+        return records.stream().filter(record -> record.getHose() == Hose.B).count() / 2;
+    }
+
+    public static long countNorthBound(List<Record> records) {
+        return records.size() - countSouthBound(records) * 4;
+    }
+
+    public static LongStream countSouthBoundPerSegment(List<List<Record>> segmentedRecords) {
+        return segmentedRecords.stream().mapToLong(records -> countSouthBound(records));
+    }
+
+    public static LongStream countNorthBoundPerSegment(List<List<Record>> segmentedRecords) {
+        return segmentedRecords.stream().mapToLong(records -> countNorthBound(records));
     }
 }
