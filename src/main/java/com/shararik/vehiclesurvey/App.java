@@ -15,11 +15,11 @@ public class App {
 
     private static final String DATA_FILE_NAME = "data.txt";
     public static List<String> data;
-    public static final int DURATION_1DAY = 86400000;
-    public static final int DURATION_1HOUR = 3600000;
-    public static final int DURATION_30MINS = 1800000;
-    public static final int DURATION_20MINS = 1200000;
-    public static final int DURATION_15MINS = 900000;
+    public static final long DURATION_1DAY = 86400000;
+    public static final long DURATION_1HOUR = 3600000;
+    public static final long DURATION_30MINS = 1800000;
+    public static final long DURATION_20MINS = 1200000;
+    public static final long DURATION_15MINS = 900000;
 
     public static void main(String[] args) throws IOException {
         try (Stream<String> dataStream = readData(DATA_FILE_NAME)) {
@@ -59,9 +59,9 @@ public class App {
         return dayEndPoints;
     }
 
-    public static List<List<Record>> segmentRecords(List<Record> records, int duration) {
+    public static List<List<Record>> segmentRecords(List<Record> records, long duration) {
         List<Integer> dayEndPoints = getDayEndPoints(records);
-        int numOfSegments = DURATION_1DAY / duration;
+        int numOfSegments = (int) (DURATION_1DAY / duration);
         List<List<Record>> segmentedRecords = new ArrayList<List<Record>>();
 
         IntStream.range(0, dayEndPoints.size()).forEach(i -> {
