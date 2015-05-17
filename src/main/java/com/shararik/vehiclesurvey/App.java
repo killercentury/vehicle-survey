@@ -23,16 +23,15 @@ public class App {
 
     public static void main(String[] args) throws IOException {
         try (Stream<String> dataStream = readData(DATA_FILE_NAME)) {
+            // convert to list for reuse
             data = dataStream.collect(Collectors.toList());
             System.out.println("Data has been loaded");
 
-            int[] timeSeriesData = transformToTimeSeriesData(data.stream());
-
-            List<Record> records = data.stream().map(s -> parseRecord(s)).collect(Collectors.toList());
+            List<Record> recordList = Transform.getRecordList(data.stream());
 //            dayEndPoints.forEach(System.out::println);
 //            dayEndPoints.forEach(i -> System.out.println(records.get(i).getTime()));
 
-            List<List<Record>> segmentedRecords = segmentRecords(records, DURATION_15MINS);
+            List<List<Record>> segmentedRecords = segmentRecords(recordList, DURATION_15MINS);
             System.out.println(segmentedRecords.size());
             countSouthBoundPerSegment(segmentedRecords).forEach(System.out::println);
         }
@@ -43,16 +42,6 @@ public class App {
         Path path = Paths.get(filePathStr);
         Stream<String> lines = Files.lines(path);
         return lines;
-    }
-
-    // Parse data from string to object
-    public static Record parseRecord(String rawData) {
-        return new Record(Hose.valueOf(rawData.substring(0, 1)), Integer.parseInt(rawData.substring(1)));
-    }
-
-    // Transform data to time series data
-    public static int[] transformToTimeSeriesData(Stream<String> dataStream) {
-        return dataStream.mapToInt(l -> Integer.parseInt(l.substring(1))).toArray();
     }
 
     // Find all the index of last data point of the day

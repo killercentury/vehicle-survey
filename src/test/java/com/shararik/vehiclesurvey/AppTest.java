@@ -22,22 +22,15 @@ public class AppTest {
 
     @Test
     public void testRawDataToObject() throws IOException {
-        Record record = App.parseRecord("A98186");
+        Record record = Transform.parseRecord("A98186");
         assertEquals(Hose.A, record.getHose());
         assertEquals(98186, record.getTime());
     }
 
     @Test
-    public void testTimeSeriesDataTransformation() throws IOException {
-        Stream<String> dataStream = App.readData("data.txt");
-        int[] timeSeriesData = App.transformToTimeSeriesData(dataStream);
-        assertEquals(67296, timeSeriesData.length);
-    }
-
-    @Test
     public void testDayEndPointsDetection() throws IOException {
         Stream<String> dataStream = App.readData("data.txt");
-        List<Record> records = dataStream.map(s -> App.parseRecord(s)).collect(Collectors.toList());
+        List<Record> records = dataStream.map(s -> Transform.parseRecord(s)).collect(Collectors.toList());
         List<Integer> dayEndPoints = App.getDayEndPoints(records);
         assertEquals(5, App.getDayEndPoints(records).size());
         assertEquals(86351672, records.get(dayEndPoints.get(0)).getTime());
@@ -50,7 +43,7 @@ public class AppTest {
     @Test
     public void testSegmentation() throws IOException {
         Stream<String> dataStream = App.readData("data.txt");
-        List<Record> records = dataStream.map(s -> App.parseRecord(s)).collect(Collectors.toList());
+        List<Record> records = dataStream.map(s -> Transform.parseRecord(s)).collect(Collectors.toList());
         List<List<Record>> segmentedRecordsPer15Mins = App.segmentRecords(records, App.DURATION_15MINS);
         assertEquals(480, segmentedRecordsPer15Mins.size());
         List<List<Record>> segmentedRecordsPer20Mins = App.segmentRecords(records, App.DURATION_20MINS);
