@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -15,7 +14,7 @@ import java.util.stream.Stream;
 public class App {
 
     private static final String DATA_FILE_NAME = "data.txt";
-    public static String[] dataArray;
+    public static List<String> data;
     public static final int DURATION_1DAY = 86400000;
     public static final int DURATION_1HOUR = 3600000;
     public static final int DURATION_30MINS = 1800000;
@@ -24,12 +23,12 @@ public class App {
 
     public static void main(String[] args) throws IOException {
         try (Stream<String> dataStream = readData(DATA_FILE_NAME)) {
-            dataArray = dataStream.toArray(String[]::new);
+            data = dataStream.collect(Collectors.toList());
             System.out.println("Data has been loaded");
 
-            int[] timeSeriesData = transformToTimeSeriesData(Arrays.stream(dataArray));
+            int[] timeSeriesData = transformToTimeSeriesData(data.stream());
 
-            List<Record> records = Arrays.stream(dataArray).map(s -> parseRecord(s)).collect(Collectors.toList());
+            List<Record> records = data.stream().map(s -> parseRecord(s)).collect(Collectors.toList());
 //            dayEndPoints.forEach(System.out::println);
 //            dayEndPoints.forEach(i -> System.out.println(records.get(i).getTime()));
 
