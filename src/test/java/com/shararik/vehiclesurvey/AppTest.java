@@ -54,7 +54,7 @@ public class AppTest {
         List<List<Record>> segmentedRecordsPer15Mins = App.segmentRecords(records, App.DURATION_15MINS);
         assertEquals(480, segmentedRecordsPer15Mins.size());
         List<List<Record>> segmentedRecordsPer20Mins = App.segmentRecords(records, App.DURATION_20MINS);
-        assertEquals(288, segmentedRecordsPer20Mins.size());
+        assertEquals(360, segmentedRecordsPer20Mins.size());
         List<List<Record>> segmentedRecordsPer30Mins = App.segmentRecords(records, App.DURATION_30MINS);
         assertEquals(240, segmentedRecordsPer30Mins.size());
         List<List<Record>> segmentedRecordsPerHour = App.segmentRecords(records, App.DURATION_1HOUR);
